@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<!--  Code found at https://vishnusathyanesan.wordpress.com/2012/08/28/my-paint-application-using-javascript/ -->
+<body>
+<h1><h1 style="text-align:center;"><font face="comic sans ms" color="#FF00FF"><i><b> MASH Paint Application </i></b></h1>
+<html style="text-align:center;" lang="en">
+<head>
+	<style type="text/css" >
+	
+		html{
+			text-align: center;
+			height: 100%;
+			 
+		}
+		body{
+			background-image: url("Capture.PNG"); 
+			background-position: center;
+			background-size: 100%;
+			text-align: center;
+			height: 100%;
+			
+		}
+
+		#paint {
+			cursor: default;
+		}
+		#paint:active {
+			cursor: pointer;
+		}
+		.menu{display:block;width:40px;height:40px;border-radius:25px;background:#000000 }
+		.menu1{display:block;width:35px;height:35px;border-radius:25px;background:#000000}
+		.menu2{display:block;width:30px;height:30px;border-radius:25px;background:#000000} 
+		.menu3{display:block;width:25px;height:25px;border-radius:25px;background:#000000 }
+		.menu4{display:block;width:20px;height:20px;border-radius:25px;background:#000000}
+		.menu5{display:block;width:18px;height:18px;border-radius:25px;background:#000000}
+	
+		#form1 {
+			width: 10em;
+			height:15.5em;
+			padding: 1em;
+			margin: 0 auto;
+			background-color: #99FFFF;
+			border: 20px solid silver;
+			
+		}
+
+		#form2 {
+			width: 10em;
+			height:19.5em;
+			padding: 1em;
+			margin: 0 auto;
+			background-color: #99FFFF;
+			border: 20px solid silver;
+			
+		}
+
+
+
+		#fullscreen 
+		{
+			height: 200px;
+			width: 400px;
+			position: fixed;
+			top: 27%;
+			left: 29%;
+			margin-top: -100px;
+			margin-left: -200px;
+		}
+
+		/* The following code assigns colours and sizes of the clickable colours. We changed the size of this button to be a smaller box to be more realistic to a paint application */
+		
+		.violet {
+		
+  		background-color: violet;
+			
+		}
+ 		.indigo {
+  			background-color: indigo;
+			
+		}
+        .blue {
+			background-color: blue;
+			
+        }
+		.green {
+  			background-color: green;
+			
+		}
+		.yellow {
+  			background-color: yellow;
+			
+		}
+		.orange {
+  			background-color: orange;
+			
+		}
+		.red {
+  			background-color: red;
+			
+		}
+		.white {
+ 			background-color: white;
+			
+		}
+		.brown {
+			background-color: brown;
+			
+        }
+        .clear {
+			background-color: white;
+			color: black;
+        }
+		.eraser {
+ 			background-color: white;
+			color: black;
+			
+		}
+		/* The following code allows each button to be designed in bulk, her we have made the following buttons a bold font  */
+		.clear,.pencil,.rectangle,.circle,.linear,.eraser{
+  			color:blue;
+    		font-weight: bold;
+			background-color:#FFFFCC;
+		}
+		
+		.brown, .white, .red, .orange, .yellow, .green, .blue, .indigo, .violet
+		{
+		width: 3em;
+		height:3em;
+		}
+
+		#footer
+		{
+		text-align:center;
+		padding-top:30px;
+		font-size:15px;
+		font-family:Arial, Helvetica, sans-serif;
+		color:black;
+		margin:2px;
+		font-style:italic;
+			}
+	
+    </style>
+
+</head>
+<head>
+    <meta charset="utf-8">
+    <title>Canvas Paint </title>
+    <style type="text/css">
+	
+      #container { text-align: center; margin: 0 auto; }
+		/* This creates the border and assigns the colour */
+      #paint { border: 20px solid silver;
+               background:white;}
+    </style>
+  </head>
+  <body>
+  <div id = "fullscreen">
+	<table>
+	<tr>
+	<td>
+	<form  method=post >
+			<div id="form1">
+				<p><font face="comic sans ms" color="#6600FF"><u><b><i>Choose Color</i></b></u></p>
+				<button type="button" onclick="violet()"class=violet><i><b></i></b></button>
+				<button type="button" onclick="indigo()"class=indigo><i><b></i></b></button>
+				<button type="button" onclick="blue()"class=blue><i><b></i></b></button>
+				<button type="button" onclick="green()"class=green><i><b></i></b></button>
+				<button type="button" onclick="yellow()"class=yellow><i><b></i></b></button>
+				<button type="button" onclick="orange()"class=orange><i><b></i></b></button>
+				<button type="button" onclick="red()"class=red><i><b></i></b></button>
+				<button type="button" onclick="brown()"class=brown><i><b></i></b></button>
+				<button type="button" onclick="white()"class=white><i><b></i></b></button>
+<br>
+				<!-- As the following button is clicked the canvas is cleared-->
+				<input type=button value="Clear" onClick="history.go()">
+			</div>
+			</form>
+			</td>
+	<td>
+		<div id="container" >
+		<!-- Creates the size that our canvas will be on the screen-->
+			<canvas id="paint" width="400" height="500" ></canvas>
+			<div id="footer"> <b>Mark O'Sullivan 11522427, Anna Sargent 11438432, <br>Sean White 11502707, Hayley Manning 11372751 </div>
+		</div>
+	</td>
+
+	<script type="text/javascript" >
+
+		//The following code is initialising all of the variables//
+		var canvas, context, tool,size,pen=1 ;
+		
+		var drag=false,rect={},rectan=0; circl=0; circ = {}; line=0; linea={};buckRect={},buckRectan=0;buckcircl=0; buckcirc = {};
+		//The function init identifies the canvas as 2d, the event listeners are following the mouse//
+		function init () {
+			canvas = document.getElementById('paint');
+			context = canvas.getContext('2d');
+			canvas.addEventListener('mousedown', mousepoint, false);
+			canvas.addEventListener('mousemove', mousepoint, false);
+			canvas.addEventListener('mouseup',   mousepoint, false);
+		}
+		// The following code represents the 6 sizes that the user can use on the application. //
+		black();
+		function size0(){
+			return size=7;
+		}
+		function size1(){
+			return size=6;
+		}
+		function size2(){
+			return size=5;
+		}
+		function size3(){
+			return size=4;
+		}
+		function size4(){
+			return size=3;
+		}
+		function size5(){
+			return size=1;
+		}
+
+		//The following code represents the colour selection. It connects to the form further in the code so that when a colour is chosen the application will return the correct colour //
+
+		function black(){
+			tool = new pencil(color='black');
+		}
+		function violet(){
+			return color='violet';
+		}
+		function indigo(){
+			return color='indigo';
+		}
+		function blue(){
+			return color='blue';
+		}
+		function red(){
+			return color='red';
+		}
+		function green(){
+			return color='green';
+		}
+		function orange(){
+			return color='orange';
+		}
+		function yellow(){
+			return color='yellow';
+		}
+		function brown(){
+			return color='brown';
+		}
+		function white(){
+			return color= 'white';
+		}
+		//The following code represents the colour white which can also be used as the eraser //
+		function eraser(){
+			tool = new pencil(color='white');
+		}
+
+
+		//-----------------------------Pencil-----------------------//
+		// https://vishnusathyanesan.wordpress.com/2012/08/28/my-paint-application-using-javascript/ //
+
+		function pencil () {
+			line=0;
+			rectan=0;
+			circl=0;
+			buckcircl=0;
+			pen=1;
+			buckRectan=0;
+    // The following code is identifying the tool known as the pencil. //
+			var tool = this;
+			this.started = false;
+			this.mousedown = function (e) {
+				context.beginPath();
+				context.strokeStyle=color;
+				context.lineJoin='round';
+				context.lineWidth=size;
+				context.moveTo(e._x, e._y);
+				tool.started = true;
+	
+			};
+
+			//The following code sets a starting point from when the user clicks on the canvas and an end point from when the stroke ends. //
+			this.mousemove = function (e) {
+				if (tool.started) {
+					context.lineTo(e._x, e._y);
+					if(pen==1&&rectan==0&&circl==0&&buckcircl==0&&line==0&&buckRectan==0){
+						context.stroke();
+					}
+				}
+			};
+			this.mouseup = function (e) {
+				if (tool.started) {
+					tool.mousemove(e);
+					tool.started = false;
+				}
+			};
+    
+		}
+		// The function is getting mousepoint relative to the canvas //
+		function mousepoint (e) {
+			if (e.layerX || e.layerX == 0) { //Firefox browser
+				e._x = e.layerX;
+				e._y = e.layerY;
+			} else if (e.offsetX || e.offsetX == 0) { // opera / chrome
+				e._x = e.offsetX;
+				e._y = e.offsetY;
+			}
+			var func = tool[e.type];
+			if (func) {
+				func(e);
+			}
+		}
+		init();
+		//------------------------end of pencil-----------------//
+
+
+		//-----------------Draw rectangle--------------------//
+			// https://vishnusathyanesan.wordpress.com/2012/08/28/my-paint-application-using-javascript/ //
+		function draw() {
+			if(rectan==1&&pen==0&&circl==0&&buckcircl==0&&line==0&&buckRectan==0){
+				context.strokeRect(rect.startX, rect.startY, rect.w, rect.h);
+			}
+		}
+		function mouseDownrect(e) {
+			rect.startX = e.layerX - this.offsetLeft;
+			rect.startY = e.layerY - this.offsetTop;
+			drag = true;
+		}
+		function mouseUprect() {
+			draw();
+			rect.w=0;
+			rect.h=0;
+			drag = false;
+		}
+		function mouseMoverect(e) {
+			if(drag==true){
+				rect.w = (e.layerX - this.offsetLeft) - rect.startX;
+				rect.h = (e.layerY - this.offsetTop) - rect.startY ;
+			}
+    
+		}
+		function rectangle() {
+			color = 'black';
+			rectan=1;
+			buckRectan=0;
+			buckcircl=0;
+			pen=0;
+			line=0;
+			circl=0;
+			canvas.addEventListener('mousedown', mouseDownrect, false);
+			canvas.addEventListener('mouseup', mouseUprect, false);
+			canvas.addEventListener('mousemove', mouseMoverect, false);
+  
+		}
+		//--------------------------------------------------------//
+
+        //-----------------Draw fillRectangle--------------------//
+			
+		function draw3() {
+			if(buckRectan==1&&pen==0&&circl==0&&line==0&&rectan==0&&buckcircl==0){
+				context.fillRect(buckRect.startX, buckRect.startY, buckRect.w, buckRect.h);
+			}
+		}
+		function mouseDownBuckrect(e) {
+			buckRect.startX = e.layerX - this.offsetLeft;
+			buckRect.startY = e.layerY - this.offsetTop;
+			drag = true;
+		}
+		function mouseUpBuckrect() {
+			draw3();
+			buckRect.w=0;
+			buckRect.h=0;
+			drag = false;
+		}
+		function mouseMoveBuckrect(e) {
+			if(drag==true){
+				buckRect.w = (e.layerX - this.offsetLeft) - buckRect.startX;
+				buckRect.h = (e.layerY - this.offsetTop) - buckRect.startY ;
+			}
+    
+		}
+		function bucketRect() {
+			color;
+			context.fillStyle = color;
+			buckRectan=1;
+			buckcircl=0;
+			rectan=0;
+			pen=0;
+			line=0;
+			circl=0;
+			canvas.addEventListener('mousedown', mouseDownBuckrect, false);
+			canvas.addEventListener('mouseup', mouseUpBuckrect, false);
+			canvas.addEventListener('mousemove', mouseMoveBuckrect, false);
+  
+		}
+		//--------------------------------------------------------//
+
+
+		//-----------------Draw line--------------------//
+		//The following code was created with the help of w3 schools // 
+		function draw2() {
+			if(line==1&&rectan==0&&circl==0&&pen==0&&buckRectan==0&&buckcircl==0){
+				context.beginPath();
+				context.moveTo(linea.startX,linea.startY);
+				context.lineTo(linea.xe,linea.ye);
+				context.stroke();
+			}
+		}
+		function mouseDownlinea(e) {
+			linea.startX = e.layerX - this.offsetLeft;
+			linea.startY = e.layerY - this.offsetTop;
+			drag = true;  
+		}
+		function mouseUplinea() {
+			draw2();
+		}
+		function mouseMovelinea(e) {
+			if(drag==true){
+				linea.xe = e.layerX - this.offsetLeft;
+				linea.ye = e.layerY - this.offsetTop;
+			}
+		}
+		function linear() {
+			color = 'black';
+			line = 1;
+			buckRectan=0;
+			buckcircl=0;
+			rectan=0;
+			pen=0;
+			circl=0;
+			canvas.addEventListener('mousedown', mouseDownlinea, false);
+			canvas.addEventListener('mouseup', mouseUplinea, false);
+			canvas.addEventListener('mousemove', mouseMovelinea, false); 
+		}
+		//--------------------------------------------------------//
+
+
+		//-----------------Draw circle--------------------//
+		function draw1(){
+			if(circl==1&&pen==0&&rectan==0&&line==0&&buckRectan==0&&buckcircl==0){
+								context.beginPath();
+				radius = circ.w;
+				context.arc(circ.startX, circ.startY, radius, 0, 2 * Math.PI, false);
+				context.stroke();
+			}
+		}
+		function mouseDowncirc(e) {
+			circ.startX = e.layerX - this.offsetLeft;
+			circ.startY = e.layerY - this.offsetTop;
+			drag = true;
+		}
+		function mouseUpcirc() {
+			draw1();
+			circ.w=0;
+			drag = false;
+		}
+		function mouseMovecirc(e) {
+			if(drag==true){
+				circ.w = (e.layerX - this.offsetLeft) - circ.startX;
+				circ.h = (e.layerY - this.offsetTop) - circ.startY ;
+			}
+		}
+		function circle() {
+			color = 'black';
+			circl=1;
+			buckcircl=0;
+			buckRectan=0;
+			pen=0;
+			rectan=0;
+			line=0;
+			canvas.addEventListener('mousedown', mouseDowncirc, false);
+			canvas.addEventListener('mouseup', mouseUpcirc, false);
+			canvas.addEventListener('mousemove', mouseMovecirc, false);
+		}
+
+		//---------------------------------------------------------------//
+
+
+
+//-----------------Draw Fillcircle--------------------//
+		function draw4(){
+			if(buckcircl==1&&pen==0&&rectan==0&&line==0&&buckRectan==0&&circl==0){
+				context.beginPath();
+				radius = buckcirc.w;
+				context.arc(buckcirc.startX, buckcirc.startY, radius, 0, 2 * Math.PI, false);
+				context.fill();
+				context.fillStyle();
+				context.stroke();
+			}
+		}
+		function mouseDownBuckcirc(e) {
+			buckcirc.startX = e.layerX - this.offsetLeft;
+			buckcirc.startY = e.layerY - this.offsetTop;
+			drag = true;
+		}
+		function mouseUpBuckcirc() {
+			draw4();
+			buckcirc.w=0;
+			drag = false;
+		}
+		function mouseMoveBuckcirc(e) {
+			if(drag==true){
+				buckcirc.w = (e.layerX - this.offsetLeft) - buckcirc.startX;
+				buckcirc.h = (e.layerY - this.offsetTop) - buckcirc.startY ;
+			}
+		}
+		function bucketcircle() {
+			color;
+			context.fillStyle = color;
+			buckcircl=1;
+			buckRectan=0;
+			pen=0;
+			rectan=0;
+			circl=0;
+			line=0;
+			canvas.addEventListener('mousedown', mouseDownBuckcirc, false);
+			canvas.addEventListener('mouseup', mouseUpBuckcirc, false);
+			canvas.addEventListener('mousemove', mouseMoveBuckcirc, false);
+		}
+
+		//---------------------------------------------------------------//
+
+
+
+
+	</script>
+	</div>
+  
+	<td>
+		<!-- https://vishnusathyanesan.wordpress.com/2012/08/28/my-paint-application-using-javascript/ -->
+			<form>
+			<div id="form2">
+			<p><font face="comic sans ms" color="#6600FF"><u><b>Choose Tool</b></u></p>
+
+				<!-- The following code is a form which allows the user to select; pencil, eraser, rectangle, circle or a line-->
+				<!-- As the button is clicked the fuction is called and the action can be taken out-->
+				<button type="button" onclick="black()" class=pencil><i><b>Pencil</i></b></button>
+				<button type="button" onclick="eraser()"class=eraser><i><b>Eraser</i></b></button>
+				<button type="button" onclick="rectangle()"class=rectangle ><i><b>Rectangle</i></b></button>
+				<button type="button" onclick="bucketRect()"class=rectangle ><i><b>Fill a Rectangle</i></b></button>
+				<button type="button" onclick="bucketcircle()"class=circle ><i><b>Fill a Circle</i></b></button>
+				<button type="button" onclick="circle()"class=circle ><i><b>Circle</i></b></button>
+				<button type="button" onclick="linear()"class=linear ><i><b>Line</i></b></button>
+				<table>
+					<p><u><i><b>Choose Size</i></b></u></p>
+						<tr>
+							<td>
+								<button type="button" onclick="size0()" class="menu"></button>
+							</td>
+							<td>
+								<button type="button" onclick="size1()" class="menu1"></button>
+							</td>
+							<td>
+								<button type="button" onclick="size2()" class="menu2"></button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button type="button" onclick="size3()" class="menu3"></button>
+							</td>
+							<td>
+								<button type="button" onclick="size4()" class="menu4"></button>
+							</td>
+							<td>
+								<button type="button" onclick="size5()" class="menu5"></button>
+							</td>
+						</tr>
+						
+				</table>
+				
+			</div>
+		</form>
+	</td>
+	</tr>
+	
+</table>
+</body>
+</html>
