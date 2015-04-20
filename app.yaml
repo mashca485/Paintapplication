@@ -1,0 +1,22 @@
+  application: mashpaintappca485
+  version: 1
+  runtime: python27
+  api_version: 1
+  threadsafe: yes
+
+  handlers:
+
+  - url: /(.+) #finds anything
+    static_files: www/\1 #finds same as above
+    upload: www/(.*) #uploads above
+
+  #finds and uploads the paint app which is our index.html file
+  - url: /
+    static_files: www/index.html
+    upload: www/index.html
+
+  #finds and uploads the image for our css which is a png file
+  #Regex is used to find the png file
+  - url: /(.+\.png) #.+ find and amount of characters
+    static_files: www/\2 #the \2 find the same thing as above
+    upload: www/(.*\.png)
